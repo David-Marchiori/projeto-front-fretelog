@@ -34,18 +34,18 @@ export const authService = {
 
 // Remetentes
 export const remetenteService = {
-  list: () => api.get('/remetentes'),
-  create: (data) => api.post('/remetentes', data),
-  update: (id, data) => api.put(`/remetentes/${id}`, data),
-  delete: (id) => api.delete(`/remetentes/${id}`),
+  list: () => api.get('/senders'),
+  create: (data) => api.post('/senders', data),
+  update: (id, data) => api.put(`/senders/${id}`, data),
+  delete: (id) => api.delete(`/senders/${id}`),
 }
 
 // Destinatários
 export const destinatarioService = {
-  list: () => api.get('/destinatarios'),
-  create: (data) => api.post('/destinatarios', data),
-  update: (id, data) => api.put(`/destinatarios/${id}`, data),
-  delete: (id) => api.delete(`/destinatarios/${id}`),
+  list: () => api.get('/recipients'),
+  create: (data) => api.post('/recipients', data),
+  update: (id, data) => api.put(`/recipients/${id}`, data),
+  delete: (id) => api.delete(`/recipients/${id}`),
 }
 
 // Cotações
