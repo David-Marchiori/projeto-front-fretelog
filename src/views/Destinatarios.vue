@@ -19,10 +19,10 @@
     <div v-else class="items-list">
       <div v-for="item in items" :key="item.id" class="item-card card">
         <div class="item-info">
-          <div class="item-avatar dest">{{ initials(item.nome) }}</div>
+          <div class="item-avatar dest">{{ initials(item.full_name) }}</div>
           <div>
-            <p class="item-name">{{ item.nome }}</p>
-            <p class="item-detail">{{ item.documento }} • {{ item.telefone }}</p>
+            <p class="item-name">{{ item.full_name }}</p>
+            <p class="item-detail">{{ item.tax_document }} • {{ item.phone }}</p>
             <p class="item-address">{{ formatAddress(item) }}</p>
           </div>
         </div>
@@ -45,11 +45,11 @@
             <div class="form-row cols-2">
               <div class="form-group">
                 <label>Nome completo / Razão social</label>
-                <input v-model="modal.form.nome" placeholder="Ex: Maria Souza" required />
+                <input v-model="modal.form.full_name" placeholder="Ex: Maria Souza" required />
               </div>
               <div class="form-group">
                 <label>CPF / CNPJ</label>
-                <input v-model="modal.form.documento" placeholder="000.000.000-00" />
+                <input v-model="modal.form.tax_document" placeholder="000.000.000-00" />
               </div>
             </div>
             <div class="form-row cols-2">
@@ -59,42 +59,42 @@
               </div>
               <div class="form-group">
                 <label>Telefone</label>
-                <input v-model="modal.form.telefone" placeholder="(00) 00000-0000" />
+                <input v-model="modal.form.phone" placeholder="(00) 00000-0000" />
               </div>
             </div>
             <div class="divider" />
             <div class="form-row cols-2">
               <div class="form-group">
                 <label>CEP</label>
-                <input v-model="modal.form.cep" placeholder="00000-000" maxlength="9" @input="maskCep" required />
+                <input v-model="modal.form.zip_code" placeholder="00000-000" maxlength="9" @input="maskCep" required />
               </div>
               <div class="form-group">
                 <label>Número</label>
-                <input v-model="modal.form.numero" placeholder="123" required />
+                <input v-model="modal.form.street_number" placeholder="123" required />
               </div>
             </div>
             <div class="form-group">
               <label>Logradouro</label>
-              <input v-model="modal.form.logradouro" placeholder="Rua, Avenida…" required />
+              <input v-model="modal.form.street" placeholder="Rua, Avenida…" required />
             </div>
             <div class="form-row cols-2">
               <div class="form-group">
                 <label>Bairro</label>
-                <input v-model="modal.form.bairro" placeholder="Centro" />
+                <input v-model="modal.form.neighborhood" placeholder="Centro" />
               </div>
               <div class="form-group">
                 <label>Complemento</label>
-                <input v-model="modal.form.complemento" placeholder="Apto 12" />
+                <input v-model="modal.form.complement" placeholder="Apto 12" />
               </div>
             </div>
             <div class="form-row cols-2">
               <div class="form-group">
                 <label>Cidade</label>
-                <input v-model="modal.form.cidade" placeholder="São Paulo" required />
+                <input v-model="modal.form.city" placeholder="São Paulo" required />
               </div>
               <div class="form-group">
                 <label>Estado</label>
-                <select v-model="modal.form.estado" required>
+                <select v-model="modal.form.state" required>
                   <option value="">UF</option>
                   <option v-for="uf in estados" :key="uf" :value="uf">{{ uf }}</option>
                 </select>
@@ -132,7 +132,7 @@ const modal = reactive({
 })
 
 function emptyForm() {
-  return { nome:'', documento:'', email:'', telefone:'', cep:'', logradouro:'', numero:'', bairro:'', complemento:'', cidade:'', estado:'' }
+   return { full_name:'', tax_document:'', email:'', phone:'', zip_code:'', street:'', street_number:'', neighborhood:'', complement:'', city:'', state:'' }
 }
 
 onMounted(fetchItems)
