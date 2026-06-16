@@ -16,14 +16,14 @@
               <label>Remetente</label>
               <select v-model="form.remetente_id">
                 <option value="">Selecionar remetente</option>
-                <option v-for="r in remetentes" :key="r.id" :value="r.id">{{ r.nome }}</option>
+                <option v-for="r in remetentes" :key="r.id" :value="r.id">{{ r.full_name }}</option>
               </select>
             </div>
             <div class="form-group">
               <label>Destinatário</label>
               <select v-model="form.destinatario_id">
                 <option value="">Selecionar destinatário</option>
-                <option v-for="d in destinatarios" :key="d.id" :value="d.id">{{ d.nome }}</option>
+                <option v-for="d in destinatarios" :key="d.id" :value="d.id">{{ d.full_name }}</option>
               </select>
             </div>
           </div>
@@ -34,41 +34,41 @@
           <div class="form-row cols-3">
             <div class="form-group">
               <label>Largura (cm)</label>
-              <input v-model.number="form.largura" type="number" min="1" placeholder="Ex: 20" required />
+              <input v-model.number="form.width" type="number" min="1" placeholder="Ex: 20" required />
             </div>
             <div class="form-group">
               <label>Altura (cm)</label>
-              <input v-model.number="form.altura" type="number" min="1" placeholder="Ex: 15" required />
+              <input v-model.number="form.height" type="number" min="1" placeholder="Ex: 15" required />
             </div>
             <div class="form-group">
               <label>Comprimento (cm)</label>
-              <input v-model.number="form.comprimento" type="number" min="1" placeholder="Ex: 30" required />
+              <input v-model.number="form.length" type="number" min="1" placeholder="Ex: 30" required />
             </div>
           </div>
 
           <div class="form-row cols-2">
             <div class="form-group">
               <label>Peso (kg)</label>
-              <input v-model.number="form.peso" type="number" min="0.1" step="0.1" placeholder="Ex: 2.5" required />
+              <input v-model.number="form.weight" type="number" min="0.1" step="0.1" placeholder="Ex: 2.5" required />
             </div>
             <div class="form-group">
               <label>Valor declarado (R$)</label>
-              <input v-model.number="form.valor_declarado" type="number" min="0" step="0.01" placeholder="Ex: 150.00" />
+              <input v-model.number="form.declared_value" type="number" min="0" step="0.01" placeholder="Ex: 150.00" />
             </div>
           </div>
 
           <div class="divider" />
 
           <div class="form-row cols-2">
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label>CEP Origem</label>
-              <input v-model="form.cep_origem" type="text" placeholder="00000-000" maxlength="9"
+              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
                 @input="maskCep($event, 'cep_origem')" required />
-            </div>
+            </div> -->
             <div class="form-group">
               <label>CEP Destino</label>
-              <input v-model="form.cep_destino" type="text" placeholder="00000-000" maxlength="9"
-                @input="maskCep($event, 'cep_destino')" required />
+              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
+                @input="maskCep($event, 'zip_code')" required />
             </div>
           </div>
 
@@ -148,8 +148,8 @@ const erro = ref(null)
 
 const form = reactive({
   remetente_id: '', destinatario_id: '',
-  largura: '', altura: '', comprimento: '', peso: '',
-  valor_declarado: '', cep_origem: '', cep_destino: ''
+  width: '', height: '', length: '', weight: '',
+  declared_value: '', zip_code: '', zip_code: ''
 })
 
 onMounted(async () => {
