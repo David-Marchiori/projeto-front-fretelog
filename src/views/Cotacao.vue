@@ -11,7 +11,7 @@
         <h2 class="section-title">Dados do Envio</h2>
         <form @submit.prevent="calcular" class="form-stack">
 
-          <div class="form-row cols-2">
+          <!-- <div class="form-row cols-2">
             <div class="form-group">
               <label>Remetente</label>
               <select v-model="form.remetente_id">
@@ -25,6 +25,19 @@
                 <option value="">Selecionar destinatário</option>
                 <option v-for="d in destinatarios" :key="d.id" :value="d.id">{{ d.full_name }}</option>
               </select>
+            </div>
+          </div> -->
+                  <div class="form-row cols-2">
+            <div class="form-group">
+              <label>CEP Origem</label>
+              <p class="field-note">Cep de origem é 88270-000. Galpão de coleta</p>
+              <!-- <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
+                @input="maskCep($event, 'cep_origem')" required /> -->
+            </div>
+            <div class="form-group">
+              <label>CEP Destino</label>
+              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
+                @input="maskCep($event, 'zip_code')" required />
             </div>
           </div>
 
@@ -48,7 +61,7 @@
 
           <div class="form-row cols-2">
             <div class="form-group">
-              <label>Peso (kg)</label>
+              <label>Peso (gramas)</label>
               <input v-model.number="form.weight" type="number" min="0.1" step="0.1" placeholder="Ex: 2.5" required />
             </div>
             <div class="form-group">
@@ -59,18 +72,7 @@
 
           <div class="divider" />
 
-          <div class="form-row cols-2">
-            <!-- <div class="form-group">
-              <label>CEP Origem</label>
-              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
-                @input="maskCep($event, 'cep_origem')" required />
-            </div> -->
-            <div class="form-group">
-              <label>CEP Destino</label>
-              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
-                @input="maskCep($event, 'zip_code')" required />
-            </div>
-          </div>
+  
 
           <Transition name="fade">
             <div v-if="erro" class="alert-error">{{ erro }}</div>
@@ -89,28 +91,20 @@
           <div v-if="resultado" class="card resultado-card">
             <div class="resultado-header">
               <span class="badge badge-success">✓ Cotação disponível</span>
-              <span class="resultado-prazo">{{ resultado.prazo_dias }} dias úteis</span>
+              <span class="resultado-prazo">{{ resultado.delivery_days }} dias úteis</span>
             </div>
 
             <div class="resultado-price">
               <span class="price-label">Valor estimado</span>
-              <span class="price-value">{{ formatCurrency(resultado.valor) }}</span>
+              <span class="price-value">{{ formatCurrency(resultado.price) }}</span>
             </div>
 
             <div class="divider" />
 
             <div class="resultado-details">
               <div class="detail-row">
-                <span>Transportadora</span>
-                <span class="mono">{{ resultado.transportadora || '—' }}</span>
-              </div>
-              <div class="detail-row">
-                <span>Modalidade</span>
-                <span>{{ resultado.modalidade || '—' }}</span>
-              </div>
-              <div class="detail-row">
                 <span>Peso cubado</span>
-                <span class="mono">{{ resultado.peso_cubado || '—' }} kg</span>
+                <span class="mono">{{ resultado.weight_used || '—' }} kg</span>
               </div>
             </div>
 
@@ -188,7 +182,7 @@ function formatCurrency(val) {
 h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
 .page-sub { font-size: 14px; color: var(--text-3); margin-top: 4px; }
 
-.layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+.layout-grid { display: grid; grid-template-columns: 1fr 240px; gap: 20px; align-items: start; }
 @media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }
 
 .section-title { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
