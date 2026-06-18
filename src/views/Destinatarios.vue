@@ -41,77 +41,7 @@
             <button class="btn-close" @click="closeModal">✕</button>
           </div>
 
-          <form @submit.prevent="saveItem" class="form-stack">
-            <div class="form-row cols-2">
-              <div class="form-group">
-                <label>Nome completo / Razão social</label>
-                <input v-model="modal.form.full_name" placeholder="Ex: Maria Souza" required />
-              </div>
-              <div class="form-group">
-                <label>CPF / CNPJ</label>
-                <input v-model="modal.form.tax_document" placeholder="000.000.000-00" />
-              </div>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-group">
-                <label>E-mail</label>
-                <input v-model="modal.form.email" type="email" placeholder="email@exemplo.com" />
-              </div>
-              <div class="form-group">
-                <label>Telefone</label>
-                <input v-model="modal.form.phone" placeholder="(00) 00000-0000" />
-              </div>
-            </div>
-            <div class="divider" />
-            <div class="form-row cols-2">
-              <div class="form-group">
-                <label>CEP</label>
-                <input v-model="modal.form.zip_code" placeholder="00000-000" maxlength="9" @input="maskCep" required />
-              </div>
-              <div class="form-group">
-                <label>Número</label>
-                <input v-model="modal.form.street_number" placeholder="123" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Logradouro</label>
-              <input v-model="modal.form.street" placeholder="Rua, Avenida…" required />
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-group">
-                <label>Bairro</label>
-                <input v-model="modal.form.neighborhood" placeholder="Centro" />
-              </div>
-              <div class="form-group">
-                <label>Complemento</label>
-                <input v-model="modal.form.complement" placeholder="Apto 12" />
-              </div>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-group">
-                <label>Cidade</label>
-                <input v-model="modal.form.city" placeholder="São Paulo" required />
-              </div>
-              <div class="form-group">
-                <label>Estado</label>
-                <select v-model="modal.form.state" required>
-                  <option value="">UF</option>
-                  <option v-for="uf in estados" :key="uf" :value="uf">{{ uf }}</option>
-                </select>
-              </div>
-            </div>
-
-            <Transition name="fade">
-              <div v-if="modal.erro" class="alert-error">{{ modal.erro }}</div>
-            </Transition>
-
-            <div class="modal-footer">
-              <button type="button" class="btn-ghost" @click="closeModal">Cancelar</button>
-              <button type="submit" class="btn-primary" :disabled="modal.saving">
-                {{ modal.saving ? 'Salvando…' : 'Salvar' }}
-              </button>
-            </div>
-          </form>
+          <DestinatarioForm v-model="modal.form" />
         </div>
       </div>
     </Transition>
@@ -121,10 +51,11 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { destinatarioService } from '../services/api'
+import DestinatarioForm from '../components/DestinatarioForm.vue'
 
 const items = ref([])
 const loading = ref(true)
-const estados = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
+const estados = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
 
 const modal = reactive({
   open: false, editing: null, saving: false, erro: null,
@@ -132,7 +63,7 @@ const modal = reactive({
 })
 
 function emptyForm() {
-   return { full_name:'', tax_document:'', email:'', phone:'', zip_code:'', street:'', street_number:'', neighborhood:'', complement:'', city:'', state:'' }
+  return { full_name: '', tax_document: '', email: '', phone: '', zip_code: '', street: '', street_number: '', neighborhood: '', complement: '', city: '', state: '' }
 }
 
 onMounted(fetchItems)
@@ -158,7 +89,7 @@ function closeModal() { modal.open = false }
 
 function maskCep(e) {
   let v = e.target.value.replace(/\D/g, '')
-  if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,8)
+  if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8)
   modal.form.cep = v
 }
 
@@ -187,7 +118,7 @@ async function deleteItem(item) {
 }
 
 function initials(nome) {
-  return (nome || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase()
+  return (nome || '?').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
 function formatAddress(item) {
@@ -197,54 +128,188 @@ function formatAddress(item) {
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
-h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
-.page-sub { font-size: 14px; color: var(--text-3); margin-top: 4px; }
-
-.items-list { display: flex; flex-direction: column; gap: 12px; }
-.item-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.item-info { display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0; }
-.item-avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--success-dim); color: var(--success);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 600; flex-shrink: 0;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
 }
-.item-name { font-size: 14px; font-weight: 500; }
-.item-detail { font-size: 12px; color: var(--text-3); margin-top: 2px; font-family: var(--mono); }
-.item-address { font-size: 12px; color: var(--text-3); margin-top: 2px; }
-.item-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-.btn-sm { padding: 7px 12px; font-size: 12px; }
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.page-sub {
+  font-size: 14px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.item-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--success-dim);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.item-detail {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+.item-address {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
 .btn-delete {
-  background: transparent; color: var(--text-3); font-size: 12px;
-  border: 1px solid var(--border); border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 7px 12px;
 }
-.btn-delete:hover { background: var(--danger-dim); color: var(--danger); border-color: transparent; }
+
+.btn-delete:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+  border-color: transparent;
+}
 
 .empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 12px; text-align: center; padding: 48px 24px; color: var(--text-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-3);
 }
-.empty-icon { font-size: 32px; }
-.empty-state p { font-size: 14px; }
-.loading-state { color: var(--text-3); font-size: 14px; padding: 24px; }
+
+.empty-icon {
+  font-size: 32px;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+.loading-state {
+  color: var(--text-3);
+  font-size: 14px;
+  padding: 24px;
+}
 
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 16px;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
 }
-.modal-box { width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.modal-header h2 { font-size: 16px; font-weight: 600; }
-.btn-close { background: transparent; color: var(--text-3); font-size: 16px; padding: 4px 8px; }
-.btn-close:hover { color: var(--text); }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
-.form-stack { display: flex; flex-direction: column; gap: 14px; }
+
+.modal-box {
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-close {
+  background: transparent;
+  color: var(--text-3);
+  font-size: 16px;
+  padding: 4px 8px;
+}
+
+.btn-close:hover {
+  color: var(--text);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .alert-error {
-  background: var(--danger-dim); border: 1px solid rgba(248,113,113,0.2);
-  color: var(--danger); border-radius: var(--radius); padding: 10px 14px; font-size: 13px;
+  background: var(--danger-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
 }
 </style>

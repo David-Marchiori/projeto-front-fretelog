@@ -11,35 +11,7 @@
         <h2 class="section-title">Dados do Envio</h2>
         <form @submit.prevent="calcular" class="form-stack">
 
-          <!-- <div class="form-row cols-2">
-            <div class="form-group">
-              <label>Remetente</label>
-              <select v-model="form.remetente_id">
-                <option value="">Selecionar remetente</option>
-                <option v-for="r in remetentes" :key="r.id" :value="r.id">{{ r.full_name }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Destinatário</label>
-              <select v-model="form.destinatario_id">
-                <option value="">Selecionar destinatário</option>
-                <option v-for="d in destinatarios" :key="d.id" :value="d.id">{{ d.full_name }}</option>
-              </select>
-            </div>
-          </div> -->
-                  <div class="form-row cols-2">
-            <div class="form-group">
-              <label>CEP Origem</label>
-              <p class="field-note">Cep de origem é 88270-000. Galpão de coleta</p>
-              <!-- <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
-                @input="maskCep($event, 'cep_origem')" required /> -->
-            </div>
-            <div class="form-group">
-              <label>CEP Destino</label>
-              <input v-model="form.zip_code" type="text" placeholder="00000-000" maxlength="9"
-                @input="maskCep($event, 'zip_code')" required />
-            </div>
-          </div>
+          <DestinatarioForm v-model="destinatario" />
 
           <div class="divider" />
 
@@ -72,7 +44,7 @@
 
           <div class="divider" />
 
-  
+
 
           <Transition name="fade">
             <div v-if="erro" class="alert-error">{{ erro }}</div>
@@ -108,6 +80,10 @@
               </div>
             </div>
 
+            <div class="save-shipment-btn">
+              <button class="btn-secondary" @click="saveShipment">Salvar Cotação</button>
+            </div>
+
             <div v-if="resultado.servicos && resultado.servicos.length" class="servicos-list">
               <p class="field-group-title" style="margin-top:16px">Outras opções</p>
               <div v-for="s in resultado.servicos" :key="s.codigo" class="servico-item">
@@ -133,6 +109,8 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { cotacaoService, remetenteService, destinatarioService } from '../services/api'
+import Destinatarios from './Destinatarios.vue'
+import DestinatarioForm from '../components/DestinatarioForm.vue'
 
 const remetentes = ref([])
 const destinatarios = ref([])
@@ -154,7 +132,7 @@ onMounted(async () => {
 
 function maskCep(e, field) {
   let v = e.target.value.replace(/\D/g, '')
-  if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,8)
+  if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8)
   form[field] = v
 }
 
@@ -175,42 +153,148 @@ async function calcular() {
 function formatCurrency(val) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0)
 }
+
+
+async function saveShipment() {
+  loading.value = true
+  erro.value = null
+  resultado.value = null
+  try {
+    const { data } = await cotacaoService.saveQuote(form)
+    resultado.value = data?.data || data
+  } catch (e) {
+    erro.value = e.response?.data?.message || 'Erro ao calcular o frete. Verifique os dados.'
+  } finally {
+    loading.value = false
+  }
+}
+
 </script>
 
 <style scoped>
-.page-header { margin-bottom: 28px; }
-h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
-.page-sub { font-size: 14px; color: var(--text-3); margin-top: 4px; }
+.page-header {
+  margin-bottom: 28px;
+}
 
-.layout-grid { display: grid; grid-template-columns: 1fr 240px; gap: 20px; align-items: start; }
-@media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
 
-.section-title { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
-.field-group-title { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
-.form-stack { display: flex; flex-direction: column; gap: 16px; }
+.page-sub {
+  font-size: 14px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
 
-.btn-calc { width: 100%; padding: 13px; font-size: 14px; }
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+}
+
+.field-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn-calc {
+  width: 100%;
+  padding: 13px;
+  font-size: 14px;
+}
 
 .alert-error {
   background: var(--danger-dim);
-  border: 1px solid rgba(248,113,113,0.2);
+  border: 1px solid rgba(248, 113, 113, 0.2);
   color: var(--danger);
   border-radius: var(--radius);
   padding: 10px 14px;
   font-size: 13px;
 }
 
-.resultado-card { display: flex; flex-direction: column; }
-.resultado-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.resultado-prazo { font-size: 13px; color: var(--text-2); }
+.resultado-card {
+  display: flex;
+  flex-direction: column;
+}
 
-.resultado-price { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
-.price-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
-.price-value { font-size: 32px; font-weight: 600; color: var(--success); letter-spacing: -0.03em; font-family: var(--mono); }
+.resultado-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 
-.resultado-details { display: flex; flex-direction: column; gap: 10px; }
-.detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-.detail-row > span:first-child { color: var(--text-3); }
+.resultado-prazo {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.resultado-price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.price-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.price-value {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--success);
+  letter-spacing: -0.03em;
+  font-family: var(--mono);
+}
+
+.resultado-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.detail-row>span:first-child {
+  color: var(--text-3);
+}
 
 .servico-item {
   display: flex;
@@ -221,9 +305,24 @@ h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
   border-radius: var(--radius);
   margin-top: 8px;
 }
-.servico-nome { font-size: 13px; font-weight: 500; }
-.servico-prazo { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.servico-valor { font-size: 14px; font-weight: 600; font-family: var(--mono); color: var(--accent); }
+
+.servico-nome {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.servico-prazo {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.servico-valor {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--accent);
+}
 
 .empty-state {
   display: flex;
@@ -234,7 +333,17 @@ h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
   padding: 40px 24px;
   color: var(--text-3);
 }
-.empty-icon { font-size: 32px; }
-.empty-state p { font-size: 13px; line-height: 1.6; }
-.empty-state strong { color: var(--text-2); }
+
+.empty-icon {
+  font-size: 32px;
+}
+
+.empty-state p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.empty-state strong {
+  color: var(--text-2);
+}
 </style>
