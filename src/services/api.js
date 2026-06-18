@@ -51,5 +51,6 @@ export const destinatarioService = {
 // Cotações
 export const cotacaoService = {
   calcular: (data) => api.post('/quotes', data),
+  saveQuote: (data) => api.post('/quotes', data),
   list: () => api.get('/shipments'),
 }

@@ -11,7 +11,7 @@
         <h2 class="section-title">Dados do Envio</h2>
         <form @submit.prevent="calcular" class="form-stack">
 
-          <DestinatarioForm v-model="destinatario" />
+          <DestinatarioForm v-model="destinatarioData" />
 
           <div class="divider" />
 
@@ -19,26 +19,28 @@
           <div class="form-row cols-3">
             <div class="form-group">
               <label>Largura (cm)</label>
-              <input v-model.number="form.width" type="number" min="1" placeholder="Ex: 20" required />
+              <input v-model.number="formShipment.width" type="number" min="1" placeholder="Ex: 20" required />
             </div>
             <div class="form-group">
               <label>Altura (cm)</label>
-              <input v-model.number="form.height" type="number" min="1" placeholder="Ex: 15" required />
+              <input v-model.number="formShipment.height" type="number" min="1" placeholder="Ex: 15" required />
             </div>
             <div class="form-group">
               <label>Comprimento (cm)</label>
-              <input v-model.number="form.length" type="number" min="1" placeholder="Ex: 30" required />
+              <input v-model.number="formShipment.length" type="number" min="1" placeholder="Ex: 30" required />
             </div>
           </div>
 
           <div class="form-row cols-2">
             <div class="form-group">
               <label>Peso (gramas)</label>
-              <input v-model.number="form.weight" type="number" min="0.1" step="0.1" placeholder="Ex: 2.5" required />
+              <input v-model.number="formShipment.weight" type="number" min="0.1" step="0.1" placeholder="Ex: 2.5"
+                required />
             </div>
             <div class="form-group">
               <label>Valor declarado (R$)</label>
-              <input v-model.number="form.declared_value" type="number" min="0" step="0.01" placeholder="Ex: 150.00" />
+              <input v-model.number="formShipment.declared_value" type="number" min="0" step="0.01"
+                placeholder="Ex: 150.00" />
             </div>
           </div>
 
@@ -50,11 +52,13 @@
             <div v-if="erro" class="alert-error">{{ erro }}</div>
           </Transition>
 
-          <button type="submit" class="btn-primary btn-calc" :disabled="loading">
-            <span v-if="loading">Calculando…</span>
-            <span v-else>Calcular Frete</span>
-          </button>
+
         </form>
+
+        <button @click="calcular" class="btn-primary btn-calc" :disabled="loading">
+          <span v-if="loading">Calculando…</span>
+          <span v-else>Calcular Frete</span>
+        </button>
       </div>
 
       <!-- Resultado -->
@@ -80,9 +84,9 @@
               </div>
             </div>
 
-            <div class="save-shipment-btn">
+            <!-- <div class="save-shipment-btn">
               <button class="btn-secondary" @click="saveShipment">Salvar Cotação</button>
-            </div>
+            </div> -->
 
             <div v-if="resultado.servicos && resultado.servicos.length" class="servicos-list">
               <p class="field-group-title" style="margin-top:16px">Outras opções</p>
@@ -96,7 +100,12 @@
             </div>
           </div>
         </Transition>
-
+        <div v-if="resultado" class="btn-save-shipment">
+          <button @click="saveQuote" class="btn-primary btn-calc" :disabled="loading">
+            <span v-if="loading">Calculando…</span>
+            <span v-else>Calcular Frete</span>
+          </button>
+        </div>
         <div v-if="!resultado" class="empty-state card">
           <span class="empty-icon">📦</span>
           <p>Preencha o formulário e clique em <strong>Calcular Frete</strong> para ver as opções de envio.</p>
@@ -109,39 +118,27 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { cotacaoService, remetenteService, destinatarioService } from '../services/api'
-import Destinatarios from './Destinatarios.vue'
 import DestinatarioForm from '../components/DestinatarioForm.vue'
 
-const remetentes = ref([])
-const destinatarios = ref([])
 const resultado = ref(null)
+const destinatarioData = reactive({})
 const loading = ref(false)
 const erro = ref(null)
 
-const form = reactive({
-  remetente_id: '', destinatario_id: '',
+
+
+const formShipment = reactive({
   width: '', height: '', length: '', weight: '',
-  declared_value: '', zip_code: '', zip_code: ''
+  declared_value: '', zip_code: '',
 })
-
-onMounted(async () => {
-  const [r, d] = await Promise.all([remetenteService.list(), destinatarioService.list()])
-  remetentes.value = r.data?.data || r.data || []
-  destinatarios.value = d.data?.data || d.data || []
-})
-
-function maskCep(e, field) {
-  let v = e.target.value.replace(/\D/g, '')
-  if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8)
-  form[field] = v
-}
 
 async function calcular() {
   loading.value = true
   erro.value = null
   resultado.value = null
   try {
-    const { data } = await cotacaoService.calcular(form)
+    const payload = { ...formShipment, zip_code: destinatarioData.zip_code }
+    const { data } = await cotacaoService.calcular(payload)
     resultado.value = data?.data || data
   } catch (e) {
     erro.value = e.response?.data?.message || 'Erro ao calcular o frete. Verifique os dados.'
@@ -154,20 +151,19 @@ function formatCurrency(val) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0)
 }
 
-
-async function saveShipment() {
-  loading.value = true
-  erro.value = null
-  resultado.value = null
+async function saveQuote() {
+  if (!resultado.value) return
+  const shipmentData = { ...resultado.value, zip_code: destinatarioData.zip_code }
   try {
-    const { data } = await cotacaoService.saveQuote(form)
-    resultado.value = data?.data || data
+    await destinatarioService.create(destinatarioData)
+    await cotacaoService.saveQuote(shipmentData)
+    alert('Cotação salva com sucesso!')
   } catch (e) {
-    erro.value = e.response?.data?.message || 'Erro ao calcular o frete. Verifique os dados.'
-  } finally {
-    loading.value = false
+    alert('Erro ao salvar a cotação. Tente novamente.')
   }
 }
+
+
 
 </script>
 

@@ -62,21 +62,7 @@ const modal = reactive({
   form: emptyForm()
 })
 
-function emptyForm() {
-  return { full_name: '', tax_document: '', email: '', phone: '', zip_code: '', street: '', street_number: '', neighborhood: '', complement: '', city: '', state: '' }
-}
-
 onMounted(fetchItems)
-
-async function fetchItems() {
-  loading.value = true
-  try {
-    const { data } = await destinatarioService.list()
-    items.value = data?.data || data || []
-  } finally {
-    loading.value = false
-  }
-}
 
 function openModal(item = null) {
   modal.editing = item
