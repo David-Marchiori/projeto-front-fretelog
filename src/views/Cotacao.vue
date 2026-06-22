@@ -140,6 +140,8 @@ async function calcular() {
     const payload = { ...formShipment, zip_code: destinatarioData.zip_code }
     const { data } = await cotacaoService.calcular(payload)
     resultado.value = data?.data || data
+
+    console.log('Cotação calculada:', resultado.value)
   } catch (e) {
     erro.value = e.response?.data?.message || 'Erro ao calcular o frete. Verifique os dados.'
   } finally {
@@ -153,15 +155,23 @@ function formatCurrency(val) {
 
 async function saveQuote() {
   if (!resultado.value) return
-  const shipmentData = { ...resultado.value, zip_code: destinatarioData.zip_code }
+  const shipmentData = {
+    ...resultado.value,
+    origin_postal_code: "88240-000",
+    destination_postal_code: destinatarioData.zip_code,
+    destination_street: destinatarioData.street || "Rua Exemplo",
+    weight_kg: formShipment.weight * 0.001,
+  }
+  console.log('Saving shipment data:', shipmentData)
   try {
     await destinatarioService.create(destinatarioData)
-    await cotacaoService.saveQuote(shipmentData)
+    await cotacaoService.create(shipmentData)
     alert('Cotação salva com sucesso!')
   } catch (e) {
     alert('Erro ao salvar a cotação. Tente novamente.')
   }
 }
+
 
 
 

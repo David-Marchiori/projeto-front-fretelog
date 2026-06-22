@@ -56,7 +56,7 @@ import DestinatarioForm from '../components/DestinatarioForm.vue'
 const items = ref([])
 const loading = ref(true)
 const estados = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
-
+const destinatarioData = reactive({})
 const modal = reactive({
   open: false, editing: null, saving: false, erro: null,
   form: emptyForm()
