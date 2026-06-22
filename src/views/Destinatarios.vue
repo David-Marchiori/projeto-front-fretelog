@@ -59,14 +59,26 @@ const estados = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT
 const destinatarioData = reactive({})
 const modal = reactive({
   open: false, editing: null, saving: false, erro: null,
-  form: emptyForm()
+  form: destinatarioData
 })
+
+async function fetchItems() {
+  loading.value = true
+  try {
+    const { data } = await destinatarioService.list()
+    items.value = data?.data || data
+  } catch (e) {
+    console.error('Erro ao buscar destinatários:', e)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(fetchItems)
 
 function openModal(item = null) {
   modal.editing = item
-  modal.form = item ? { ...item } : emptyForm()
+  modal.form = item ? { ...item } : { full_name: '', tax_document: '', phone: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', zip_code: '' }
   modal.erro = null
   modal.open = true
 }
